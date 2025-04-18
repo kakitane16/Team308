@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class Saebasi : MonoBehaviour
 {
+
+    bool used = false;
+
     //何かがぶつかって来た時に動く処理を書く場所
    private void OnTriggerEnter(Collider other)
     {
-        //このsusiObjectってついてる名前（タグ）にだけ反応して動く処理
-        if(other.CompareTag("susiObject"))
+        if (used) return;
+        //このPlayerってついてる名前（タグ）にだけ反応して動く処理
+        if(other.CompareTag("Player"))
         {
             //otherはぶつかって来たobjectを指す
             //Rigitbody動きのデータをとる、落ちる、跳ねる、飛ぶなど　Rigitbodyがないとできない
@@ -39,7 +43,11 @@ public class Saebasi : MonoBehaviour
         //↓このオブジェクトはもう動いていいよという処理
         rb.isKinematic = false;
         //真下に向かって速さ３で落ちる処理
-        rb.velocity = Vector3.down * 3f;
+        rb.velocity = Vector3.down * 10f;
+
+        used = true;
     }
+
+    
 
 }
