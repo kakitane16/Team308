@@ -4,52 +4,76 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float ShotForce = 10f; // Shotの強さ
-    public float curveForce = 2f; // 湾曲の強さ
-    public bool canShot = true; // Shot可能かどうか
-    private Rigidbody rb;
+    public float bounceDamping; // 跳ね返り時の減衰率
+    private float MoveX;
+    private float MoveY;
+    private bool isShot;
+    Rigidbody rb;
+    public Vector3 velocity;
 
+    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        MoveX = -15.0f;
+        MoveY = 10.0f;
+        isShot = false;
+    }
+    // Update is called once per frame
+    private void Update()
+    {
+
     }
 
-    void Update()
+    private void OnCollisionEnter(Collision other)
     {
-        // Spaceキーが押されたとき、一回だけShot
-        if (Input.GetKeyDown(KeyCode.Space) && canShot)
+        //タグWallに当たったら跳ね返る
+        if (other.gameObject.CompareTag("Wall"))
         {
-            Shot();
+            Vector3 velocityNext = Vector3.Reflect(velocity, other.contacts[0].normal);
+            rb.velocity = velocityNext;
+            velocity = rb.velocity * bounceDamping;//速さなどを減衰させていく
         }
     }
 
-    void Shot()
+    private void FixedUpdate()
     {
-        canShot = false; // 一回だけ打つと打たなくなる
-
-        // 上方向にジャンプ力を加える
-        rb.velocity = Vector3.zero; // 速度リセット
-        rb.AddForce(Vector3.up * ShotForce, ForceMode.Impulse);
-
-        // 湾曲をコルーチンで適用
-        StartCoroutine(ApplyCurve());
+        Shot();
     }
 
-    IEnumerator ApplyCurve()
+    private void Shot()
     {
-        float duration = 1.0f; // 湾曲力を加える時間
-        float elapsed = 0f;
-
-        while (elapsed < duration)
+        //一度だけ打つ
+        if (isShot)
         {
-            // 前方向 + 横方向に力を加える
-            rb.AddForce((transform.forward + transform.right * curveForce) * Time.deltaTime, ForceMode.VelocityChange);
-            elapsed += Time.deltaTime;
-            yield return null;
+            return;
         }
 
-        // ジャンプが完了した後、canShotをリセット
-        yield return new WaitForSeconds(1f); // 着地までの猶予
-        canShot = true;
+        ShotAngle();
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            rb.velocity = velocity;
+            isShot = true;
+        }
+    }
+
+    private void ShotAngle()
+    {
+        /*一次方程式
+        　(MoveX,Y)の表ができる*/
+        if(Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            MoveX += 10;
+            MoveY += 5;
+        }
+        if(Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            MoveX -= 10;
+            MoveY -= 5;
+        }
+
+        //角度指定
+        velocity = new Vector3(MoveX, MoveY, 0.0f);
     }
 }
