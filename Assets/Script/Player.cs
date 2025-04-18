@@ -1,63 +1,55 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
-    private float MoveX;
-    private bool isShot;
-    float distance = 0;
-    Rigidbody rb;
-    public Vector3 movement;
-    public Vector3 MousePos;
-    public Vector3 velocity;
-    Plane plane = new Plane();
+    public float ShotForce = 10f; // Shotの強さ
+    public float curveForce = 2f; // 湾曲の強さ
+    public bool canShot = true; // Shot可能かどうか
+    private Rigidbody rb;
 
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        MoveX = -15.0f;
-        isShot = false;
-        velocity = new Vector3(MoveX, 10.0f, 0.0f);
     }
 
-    private void Update()
+    void Update()
     {
-        //var ray = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        //プレイヤーの高さに
-        //plane.SetNormalAndPosition(Vector3.up, transform.localPosition);
-        //if (plane.Raycast(ray, out distance))
-        //{
-        //    var lookPoint = ray.GetPoint(distance);
-        //}
-    }
-
-    private void OnCollisionEnter(Collision other)
-    {
-        
-        if(other.gameObject.tag == "Wall")
+        // Spaceキーが押されたとき、一回だけShot
+        if (Input.GetKeyDown(KeyCode.Space) && canShot)
         {
-            Vector3 velocityNext = Vector3.Reflect(velocity, other.contacts[0].normal);
-            rb.velocity = velocityNext;
+            Shot();
         }
     }
 
-    // Update is called once per frame
-    private void FixedUpdate()
+    void Shot()
     {
-        if (isShot)
+        canShot = false; // 一回だけ打つと打たなくなる
+
+        // 上方向にジャンプ力を加える
+        rb.velocity = Vector3.zero; // 速度リセット
+        rb.AddForce(Vector3.up * ShotForce, ForceMode.Impulse);
+
+        // 湾曲をコルーチンで適用
+        StartCoroutine(ApplyCurve());
+    }
+
+    IEnumerator ApplyCurve()
+    {
+        float duration = 1.0f; // 湾曲力を加える時間
+        float elapsed = 0f;
+
+        while (elapsed < duration)
         {
-            rb.velocity = velocity;
-            isShot=false;
-            return;
+            // 前方向 + 横方向に力を加える
+            rb.AddForce((transform.forward + transform.right * curveForce) * Time.deltaTime, ForceMode.VelocityChange);
+            elapsed += Time.deltaTime;
+            yield return null;
         }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-           isShot = true;
-        }
+
+        // ジャンプが完了した後、canShotをリセット
+        yield return new WaitForSeconds(1f); // 着地までの猶予
+        canShot = true;
     }
 }
