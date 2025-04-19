@@ -15,8 +15,8 @@ public class Player : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        MoveX = -15.0f;
-        MoveY = 10.0f;
+        MoveX = -5.0f;
+        MoveY = 2.0f;
         isShot = false;
     }
     // Update is called once per frame
@@ -64,15 +64,14 @@ public class Player : MonoBehaviour
         　(MoveX,Y)の表ができる*/
         if(Input.GetKeyDown(KeyCode.UpArrow))
         {
-            MoveX += 10;
-            MoveY += 5;
+            MoveX -= 2;
+            MoveY += 3;
         }
         if(Input.GetKeyDown(KeyCode.DownArrow))
         {
-            MoveX -= 10;
-            MoveY -= 5;
+            MoveX += 2;
+            MoveY -= 3;
         }
-
         //角度指定
         velocity = new Vector3(MoveX, MoveY, 0.0f);
     }
