@@ -1,63 +1,78 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
+    public float bounceDamping; // 跳ね返り時の減衰率
     private float MoveX;
+    private float MoveY;
     private bool isShot;
-    float distance = 0;
     Rigidbody rb;
-    public Vector3 movement;
-    public Vector3 MousePos;
     public Vector3 velocity;
-    Plane plane = new Plane();
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        MoveX = -15.0f;
+        MoveX = -5.0f;
+        MoveY = 2.0f;
         isShot = false;
-        velocity = new Vector3(MoveX, 10.0f, 0.0f);
     }
-
+    // Update is called once per frame
     private void Update()
     {
-        //var ray = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        //プレイヤーの高さに
-        //plane.SetNormalAndPosition(Vector3.up, transform.localPosition);
-        //if (plane.Raycast(ray, out distance))
-        //{
-        //    var lookPoint = ray.GetPoint(distance);
-        //}
     }
 
     private void OnCollisionEnter(Collision other)
     {
-        
-        if(other.gameObject.tag == "Wall")
+        //タグWallに当たったら跳ね返る
+        if (other.gameObject.CompareTag("Wall"))
         {
             Vector3 velocityNext = Vector3.Reflect(velocity, other.contacts[0].normal);
             rb.velocity = velocityNext;
+            velocity = rb.velocity * bounceDamping;//速さなどを減衰させていく
         }
     }
 
-    // Update is called once per frame
     private void FixedUpdate()
     {
+        Shot();
+    }
+
+    private void Shot()
+    {
+        //一度だけ打つ
         if (isShot)
         {
-            rb.velocity = velocity;
-            isShot=false;
             return;
         }
+
+        ShotAngle();
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-           isShot = true;
+            rb.velocity = velocity;
+            isShot = true;
         }
+    }
+
+    private void ShotAngle()
+    {
+        /*一次方程式
+        　(MoveX,Y)の表ができる*/
+        if(Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            MoveX -= 2;
+            MoveY += 3;
+        }
+        if(Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            MoveX += 2;
+            MoveY -= 3;
+        }
+        //角度指定
+        velocity = new Vector3(MoveX, MoveY, 0.0f);
     }
 }
