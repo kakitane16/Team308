@@ -64,7 +64,7 @@ public class Player : MonoBehaviour
         Å@(MoveX,Y)ÇÃï\Ç™Ç≈Ç´ÇÈ*/
         if(Input.GetKeyDown(KeyCode.UpArrow))
         {
-            MoveX -= 2;
+            MoveX -= 4;
             MoveY += 3;
         }
         if(Input.GetKeyDown(KeyCode.DownArrow))
